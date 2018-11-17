@@ -1,0 +1,134 @@
+\newcommand{\mydriver}{pdftex}
+
+\documentclass[12pt,\mydriver]{thesis}
+
+\usepackage{titlesec}
+   \titleformat{\chapter}
+      {\normalfont\large}{Chapter \thechapter:}{1em}{}
+
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{lscape}
+\usepackage{indentfirst}
+\usepackage{latexsym}
+\usepackage{multirow}
+\usepackage{tabls}
+\usepackage{wrapfig}
+\usepackage{slashbox}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{supertabular}
+\usepackage{subeqn}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{listings}
+\usepackage{slashbox}
+\usepackage{subcaption}
+\usepackage{verbatim}
+\usepackage{graphicx}
+
+
+%\usepackage[toc, page]{appendix}
+
+\usepackage{color}
+\usepackage{courier}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,        
+    language=Python,
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+ 
+\lstset{style=mystyle}
+
+\usepackage[bookmarks, colorlinks=true, plainpages=false, citecolor=blue, urlcolor=blue, filecolor=blue, linkcolor=blue]{hyperref}
+
+\newcommand{\tbsp}{\rule{0pt}{18pt}} %used to get a vertical distance after \hlinewhat channel is
+\renewcommand{\baselinestretch}{2}
+\setlength{\textwidth}{5.9in}
+\setlength{\textheight}{9in}
+\setlength{\topmargin}{-.50in}
+%\setlength{\topmargin}{0in}    %use this setting if the printer makes the the top margin 1/2 inch instead of 1 inch
+\setlength{\oddsidemargin}{.6in}
+\setlength{\parindent}{.4in}
+\marginparwidth=0.6in
+\pagestyle{empty}
+
+\newcommand\eg[1]{e.g. {#1}}
+\newcommand\ie[1]{i.e. {#1}}
+
+\newenvironment{labeltable}{}{}
+
+\begin{document}
+
+\include{Abstract} %(must be first, required, non-numbered)
+\include{Titlepage} %(must follow Abstract, required, non-numbered)
+\include{Copyright} %(highly recommended, non-numbered)
+
+%Pages from this point start at lower-case Roman number ii)
+\pagestyle{plain}
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+% \include{Preface}  %(if present, start at lower-case Roman number ii)
+% \include{Foreword} %(if present, lower-case Roman)
+% \include{Dedication} %(if present, lower-case Roman)
+% \include{Acknowledgements} %(if present, lower-case Roman)
+
+\renewcommand{\baselinestretch}{1}
+\small\normalsize
+\tableofcontents %(required, lower-case Roman)
+%\newpage
+%\listoftables %(if present, lower-case Roman)
+%\newpage
+%\listoffigures %(if present, lower-case Roman)
+%\newpage
+% LIST OF ABBREVIATIONS
+% \addcontentsline{toc}{chapter}{List of Abbreviations}
+% \include{Abbreviations}
+
+\newpage
+\setlength{\parskip}{0em}
+\renewcommand{\baselinestretch}{2}
+\small\normalsize
+
+%Pages from this point start at Arabic numeral 1
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\include{Chapter1}
+\include{Chapter2}
+\include{Chapter3}
+\include{Chapter4}
+%\include{Chapter5}
+%\titleformat{\chapter}
+%      {\normalfont\large}{Appendix \thechapter:}{1em}{}
+%\include{AppendixA}
+%\renewcommand{\baselinestretch}{1}
+%\small\normalsize
+
+
+
+\newpage
+\bibliographystyle{unsrt}
+%\bibliography{Mendeley} %removed the link to the Mendeley bibliogrpahy file, bib needs major update anyway
+
+\end{document}

@@ -1,0 +1,7 @@
+*.aux
+*.log
+*.out
+*~
+mainthesis.blg
+mainthesis.toc
+mainthesis.synctex.gz

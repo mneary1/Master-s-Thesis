@@ -1,0 +1,100 @@
+%!TEX root = mainthesis.tex
+\renewcommand{\thechapter}{4}
+\chapter{Methodology}
+My process for detecting extraneous lines of code is composed of two parts: the detection of line dependencies and the determination of program correctness. This chapter discusses the methods I use to uncover dependencies among lines of code in a given program. I also discuss the process of determining the correctness of a solution. Combining both line dependencies and program correctness, I describe a method for identifying extraneous lines of code.
+
+\section{Line Dependencies}
+%Static and dynamic code analysis tools can analyze the flow of data and control throughout the life cycle of a program. These tools can determine metrics such as code coverage for software developers.
+The execution of a single line of code in a program depends on the outcome of at least one line of code that came before it. This is a quality shared by all programs, and it can be leveraged to find extraneous lines of code. The following section outlines three different types of line dependencies necessary to find such extraneous code.
+
+Understanding how data flows through a program helps to determine what computations are necessary to fulfill the program goal.
+
+\subsection{Data Dependencies}
+The first type of line dependency is the data dependency. This line dependency is defined as a relationship between two lines of code where each line uses the same piece of information in a specific manner. As a program executes, it stores data in variables and uses those variables for various computations. This dependency occurs between a line that assigns or alters the value of a variable, and a line that uses the contents of that variable in some manner. The line that edits a value must come before a line that uses that value. Two lines that use the same value in different computations do not constitute a data dependency, since data isn't flowing between those two lines: it is only being looked up. When a variable is updated, any line that uses that value later would be depended upon the line that performed update and not on any previous lines that altered that same variable. 
+
+Formally, a data dependency exists between two lines $(a,b)$ if and only if the following is true: line $a$ comes before line $b$ in the source code; there is an identifier $x$ that exists on both line $a$ and line $b$; line $a$ is an assignment of a value to identifier $x$; and line $b$ uses identifier $x$ is a way that is not an assignment. This definition is easily written in FOL in Equation 4.1:
+\begin{equation}
+\exists a,b,id \ Depends(a,b) \leftrightarrow isBefore(a,b) \land Assigns(a, id) \land Uses(b, id)
+\end{equation}
+The domains of $a,b$ are all possible line numbers (as integers) in the target program. The domain of $id$ is all possible variables that are initialized at any point in the target program. Each relationship between $a,b$ represents a fact about the interaction between those two lines. $isBefore(a, b)$ encodes the fact that line $a$ comes before line $b$ in a piece of source code. $Assigns(a, id)$ encodes the fact that line $a$ contains the assignment of a value to identifier $id$. $Uses(b, id)$ encodes the fact that line $b$ needs id $id$ in order to execute.
+
+\subsection{Structural Dependencies}
+%The second type of line dependency is the structural dependency. This type of dependency occurs within lines of code that are a part of the same programmatic structure. These structures include constructs like the if statement, for loop, while loop, or function definition. A structural dependency describes the relationship among the lines of code between themselves in a given structure and in relation to the rest of the program. For example, all the lines within the body of an If-Else statement are dependent upon the line that hold the condition for that If statement, as well as all the lines within the body of the Else clause.
+
+The second type of line dependency is the structural dependency. This type of line dependency is defined as the relationship between a line of code and the programming construct that encloses it. There are a few programming structures that enclose blocks of code, such as the if statement, for loop, or while loop. The only way that a line of code enclosed by one of these programming structures will execute is when the entry point of that structure is triggered. For example, the lines of code enclosed by an if statement will only execute if the condition of that statement is True. Therefore, a structural dependency exists between the line of that condition and each line of the if statement's body, as the body would not execute without first testing the condition. A similar argument can be made for the iterative structures For and While.
+
+
+
+%TODO: the above section is "not very clear" according to Marie
+
+\subsection{Execution Dependencies}
+This is the most straightforward type of line dependency. A program is simply a sequence of lines of code that execute one after another. It can be said that a dependency exists between each the each pair of lines in the chain of execution. That is to say that if line A is executed in a program's life cycle, followed by line B, then a dependency exists between line A and line B. This type of line dependency is used to determine the usefulness of other types of line dependencies. It is important to note that using only execution dependencies to detect extraneous lines is not enough.
+
+%TODO: **WHY** is it not enough?? Last few sentences confusing.
+
+\subsection{Code Coverage and Dead Code}
+An analysis of only the executed lines of a program does not provide enough information for the detection of extraneous lines of code. Discovery of \emph{dead code} --- i.e., lines of code that are never executed --- depends on the analysis of program execution. Tools for the discovery of dead code are an important part of the software development life cycle, but are not sufficient for extraneous line detection. In the IPT domain, novice programmers often write lines of code that are executed by the machine but do not contribute to the overall goal of the program. As seen in Figure \ref{fig:deadcodecounterexample}, if a student initializes a variable in a global scope that they fail to use in the remainder of their program, that code would not be caught by analyzing the executed lines of that program. The line that contains that variable's assignment will be executed every time, and thus not be deemed extraneous even though it does not affect the overall goal of that program.
+\begin{figure}
+\begin{lstlisting}
+CONST_VAR = 45
+
+def main():
+    x = int(input(`Enter an integer:'))
+    print(`:) ' * x)
+
+main()
+\end{lstlisting}
+\caption{Line 1 is executed, but it is not used anywhere else in the program. If execution dependencies are used, Line 1 would be incorrectly identified as not extraneous.}
+\label{fig:deadcodecounterexample}
+\end{figure}
+
+% Might not need an execution line dependency example, I think this is pretty straightforward.
+%TODO: Consider describing execution line dependencies first.
+
+
+\section{Uncovering Line Dependencies}
+In order to identify extraneous lines of code, we must first detect each of the three types of line dependencies. Data dependencies are the most computationally difficult to detect, followed by structural and execution dependencies. The process of detecting each of the described dependencies is discussed in the following sections.
+
+\subsection{Detecting Data Dependencies}
+
+The detection of data dependencies logically follows from the formal definition. First order logic resolution is applied to a knowledge base in order to determine the lines of code that are dependent upon each other. The target program must first be converted into a knowledge base. To begin this process, the $isBefore$ relationship is added to the knowledge base for every line number with every other line number that occurs afterwards. The target program is then transformed into an AST. This encoding standardizes the target program to make certain relationships easier to find than processing the original source.
+
+%TODO: Math mode and FOL functions do not play nice... find a better way?
+
+The AST is traversed node-by-node to find the lines that contain data assignment and usage. Each time that an identifier is assigned a value at a node on the AST, the $Assigns$ relationship between the line number of that node and the referenced identifier is added to the knowledge base. This relationship signifies that the identifier is assigned a value on that line, but the actual value of the assignment is not relevant to the dependency. It only matters that the identifier becomes a part of the program at that line. Each time that an identifier appears on a line other than when is it assigned a value, such as in an expression or in an argument to a function call, the $Uses$ relationship is added to the knowledge base. This relationship between the line number and the identifier signifies that the identifier is used in some manner on that line. The actual usage of that identifier is not relevant to the dependency; only the fact that is was used in some manner is relevant. After traversing the AST, the knowledge base contains every instance where an identifier is assigned a value or used in some manner in the form of a fact.
+
+The knowledge base is now usable as it contains all the necessary facts to determine the data dependencies. First-order logic resolution is applied to determine all possible pairs of line numbers $(a,b)$ that satisfy Equation 4.1. This process results in a list of every data dependency that exists in the target program.
+
+\subsection{Detecting Structural Dependencies}
+A structural dependency exists among two lines $(a,b)$ if they are both used in the same programming structure, independent of the contents of each line. The structural dependencies of the programming structures available to the novice student look similar. It is possible to define this type of dependency for all programming structures, but I limit the definition to three basic structures known to all students within the first few weeks of an introductory course. The dependencies within Conditionals, For Loops, and While Loops are defined in the next sections.
+
+The structural dependencies in conditional statements are straightforward. The body of an If statement will only execute if the condition of that statement is true. Regardless of how that condition evaluates at run time, every line in the body of an If statement is structurally dependent on the line that contains the condition. Similarly, if there is an attached Else clause, every line in the body of that clause is dependent on the condition. The Else If clause is similar, except every line in the body of that clause is only dependent upon the condition of the Else If and not any preceding conditions.
+
+%todo{figures for each of the structural dependencies are needed}
+
+\subsection{Detecting Execution Dependencies}
+The detection of execution dependencies can be performed with existing code tracing solutions, usually used for debugging software. A code tracer executes source code one line at a time, reporting the time and order in which lines are executed. This report is used to say that an execution dependency exists when a line $b$ is executed immediately after another line $a$.
+
+\subsection{Directed Dependency Graph}
+A method to successfully detect each type of line dependency has been described, but that detection alone is not sufficient for finding extraneous lines. The next step to find extraneous lines is the selection of an appropriate data structure. A line dependency is a one-way relationship between two line numbers, resembling an edge in a directed graph. Intuition suggests that a directed graph of line dependencies would allow the discovery of a path through dependencies as a program executes. The idea of tracing through dependencies to find extraneous lines motivates the construction of a directed dependency graph (DDG) from every known line dependency in the target program.
+
+To build the DDG, start from the target program itself. For each valid line number in the target program, add a node to the graph. Add an edge for each detected dependency $(a,b)$ among lines. The source of this edge must be $b$, and the destination of this edge must be $a$. It is now possible to perform searches and path-finding over the underlying dependencies in the target program.
+
+Here is a simple program, and the resulting DDG without execution dependencies:
+\input{figures/DDG_no_exec}
+
+Here is that same program, and the resulting DDG with execution dependencies:
+\input{figures/DDG_with_exec}
+
+\section{Program correctness}
+The next step in detecting extraneous lines of code is determining the line in the target program that is responsible for outputting the correct solution. For this step, I assume that the target program is in a final state. A final state proposes a solution to the problem it was written for, producing an output for every input given to it. I assume a final state due to the uncertain nature of extraneous lines of code. A program may contain lines of code that do not contribute to the output before it is complete. These lines may end up tying into the solution after more code is written. Also, computing the dependencies can be costly for large programs as it involves both program tracing and recursion over an AST. Therefore, it is not reasonable to detect extraneous lines of code unless the target program is in a final state. With this assumption, a target program is correct if it is in a final state, and it satisfies every goal of the problem it is intended to solve
+
+The goal of a particular target program is defined prior to performing the extraneous line detection process. A goal defines what that program is trying to accomplish in order to determine if a given solution is correct. Typically, the goal of a small program written by a novice is to output some value given some input. The exact mapping from input to output is usually given in an assignment description. For example, a student may be asked to take an integer as an input, and output whether or not that integer is even. Programs can have multiple goals if there are multiple tasks for a student to perform. In the previous example, the student could also have to write a value to the screen a certain number of times. Multiple goals need not be satisfied for the same input as different inputs might illicit different outputs. For example, the target program could be a currency converter that takes an amount in US Dollars and outputs that amount in Canadian Dollars. The goals for a program should be defined on an input-by-input basis in order to reflect the correct result given a particular input. Defining the program goals allow us to determine where in the target program that solution is finalized.
+
+\subsection{Matching Code Lines to Output}
+After defining the goals of the target program, it is necessary to determine which lines of the source code are responsible for producing its output. This step is done by running the student's code through a program tracer. The output of the tracer in a combination of the output of the program immediately preceded by the line of code that executed before the output was produced. For each line that produces an output as determined by the tracer, I add a relationship between the line number and the contents of the output as a fact to the KB. Each line number and string content pair as given the $hasOutput$ relationship.
+
+\section{Reporting Extraneous Lines}
+%TODO: This section needs to be redone as it is hard to follow.
+A target program has been manipulated in such a manner that makes the detection of extraneous lines simple. If the line responsible for a particular output is known, this method is able to trace backwards through the dependencies of that line in the DDG. The dependency edges were added with $b$ as the source to help with this backwards tracing step. An extraneous line of code does not appear on a path from the solution line to any node above that line. That is, an extraneous line of code was not used to arrive at a particular output. To ensure accuracy, the path from the solution line to every line that occurs before it is checked. This is done by performing the single source shortest path algorithm for each identified output line.
+%TODO: why/how does SSSP work in this context?

@@ -1,0 +1,25 @@
+%!TEX root = mainthesis.tex
+\renewcommand{\thechapter}{1}
+
+\chapter{Introduction}
+\section{Overview}
+
+Intelligent Tutoring Systems (ITS) are a method of computer-based reinforcement of knowledge. They are capable of tracking student progress on a topic, and reinforcing that knowledge with constructive feedback. Recently, these systems have been used in introductory computer science classes. Intelligent Programming Tutors (IPT) are capable of helping students solidify their knowledge of computer programming by reinforcing concepts taught in a traditional lecture setting. The generation of meaningful hints in an IPT is difficult to do correctly. A successful IPT is capable of generating constructive feedback to guide the student towards the correct solution of a problem that they are working on.
+
+Every problem has a particular goal in mind. Feedback to help reach that goal should be infrequent enough as not to coddle the student, but it should also be given exactly at the right time it is needed. Feedback should be informative enough to give insight into a misconception, but should not hand out the answer for free. Current methods to produce feedback include the comparison of the student's answer to past known solutions, or the generation of all possible solutions and searching through that space to find a similar solution. Each of these methods relies on a comparison to other programs, and do not inspect the student's program beyond that comparison. Therefore, they may fail to identify lines of code in a solution that are not necessary to accomplish the goal of a problem. I provide a method of identifying these extraneous lines of code so a hint generation system can use that knowledge to generate better feedback.
+
+\section{Motivation}
+
+If a student is given a problem to solve, they could use a variety of methods to produce a solution. Many different programs can produce the same solution to a problem. Therefore, generating hints based on the difference between a correct program and the student's current attempt can be limiting in the types of hints that are generated. This method of providing feedback guides students towards one particular method of solving the problem. However, the student's attempted solution could contain lines of code that are necessary for their solution to function, but are not necessary in what is considered correct. In fact, they could have lines of code that are unnecessary regardless of the correct solution used in current methods. I believe this to be an oversight in current hint generation systems: most methods simply ignore the potentially important information contained in unnecessary code.
+
+\section{Research Problem}
+
+I focus on the detection of extraneous lines of code in programs written by novice students. An \emph{extraneous} line of code is a line of code written in a program that does not have an effect on the desired solution to a problem. The majority of errors that students make when learning to program are syntactic \cite{Altadmri2015}, such errors are easily detectable by the compiler or interpreter of the language. An extraneous line of code is, by contrast, a \emph{semantic} error: \emph{the student may believe that writing that line of code has affected their desired solution, when in reality it has not.} Novice students are unable to accurately trace their programs linearly \cite{Kaczmarczyk2010}, which may contribute to the addition of meaningless lines of code. An unimportant line of code can contain valuable information about the misconception(s) that a student has on a particular topic, which is useful for generating meaningful hints. Identifying such lines of code is important to the acquisition of programming knowledge.
+
+%It is important to note that although it would be useful to have information on extraneous lines when generating feedback that it does not make sense to give such feedback until after the student submits a complete solution. It  does not make sense to attempt to find lines of code that do not make sense if the solution itself is incomplete, as lines that might be considered extraneous may become important at a later point in time.
+
+
+\section{Contribution}
+In order to feasibly produce feedback from extraneous lines of code, I must be able to identify them programmatically and within a reasonable amount of time. I propose a system that is capable of identifying extraneous lines of code in a target program. The system utilizes artificial intelligence techniques and syntactical analysis to construct a graph of dependencies among lines of code. The single source, shortest path (SSSP) algorithm is applied to that graph to determine the lines that are not used between the start and end of a program.
+
+% this chapter needs some kind of conclusion/wrapup and/or transition to the next chapter
